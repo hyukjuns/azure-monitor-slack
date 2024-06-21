@@ -1,2 +1,1 @@
-# azure-functions
-azure function app samples
+# Azure Monitor Alert to Slack 

@@ -1,0 +1,59 @@
+{
+    "schemaId":"azureMonitorCommonAlertSchema",
+    "data":{
+       "essentials":{
+          "alertId":"/subscriptions/11111111-1111-1111-1111-111111111111/providers/Microsoft.AlertsManagement/alerts/1234abcd5678efgh1234abcd5678efgh1234abcd5678efgh1234abcd5678efgh",
+          "alertRule":"test-ServiceHealthAlertRule",
+          "severity":"Sev4",
+          "signalType":"Activity Log",
+          "monitorCondition":"Fired",
+          "monitoringService":"ServiceHealth",
+          "alertTargetIDs":[
+             "/subscriptions/11111111-1111-1111-1111-111111111111"
+          ],
+          "originAlertId":"12345678-1234-1234-1234-1234567890ab",
+          "firedDateTime":"2021-11-17T05:34:48.0623172Z",
+          "description":"Alert rule description",
+          "essentialsVersion":"1.0",
+          "alertContextVersion":"1.0"
+       },
+       "alertContext":{
+          "authorization":null,
+          "channels":1,
+          "claims":null,
+          "caller":null,
+          "correlationId":"12345678-abcd-efgh-ijkl-abcd12345678",
+          "eventSource":2,
+          "eventTimestamp":"2021-11-17T05:34:44.5778226+00:00",
+          "httpRequest":null,
+          "eventDataId":"12345678-1234-1234-1234-1234567890ab",
+          "level":3,
+          "operationName":"Microsoft.ServiceHealth/incident/action",
+          "operationId":"12345678-abcd-efgh-ijkl-abcd12345678",
+          "properties":{
+             "title":"Test Action Group - Test Service Health Alert",
+             "service":"Azure Service Name",
+             "region":"Global",
+             "communication":"<p><strong>Summary of impact</strong>:&nbsp;This is the impact summary.</p>\n<p><br></p>\n<p><strong>Preliminary Root Cause</strong>: This is the preliminary root cause.</p>\n<p><br></p>\n<p><strong>Mitigation</strong>:&nbsp;Mitigation description.</p>\n<p><br></p>\n<p><strong>Next steps</strong>: These are the next steps.&nbsp;</p>\n<p><br></p>\n<p>Stay informed about Azure service issues by creating custom service health alerts: <a href=\"https://aka.ms/ash-videos\" rel=\"noopener noreferrer\" target=\"_blank\">https://aka.ms/ash-videos</a> for video tutorials and <a href=\"https://aka.ms/ash-alerts%20for%20how-to%20documentation\" rel=\"noopener noreferrer\" target=\"_blank\">https://aka.ms/ash-alerts for how-to documentation</a>.</p>\n<p><br></p>",
+             "incidentType":"Incident",
+             "trackingId":"ABC1-DEF",
+             "impactStartTime":"2021-11-16T20:00:00Z",
+             "impactMitigationTime":"2021-11-17T01:00:00Z",
+             "impactedServices":"[{\"ImpactedRegions\":[{\"RegionName\":\"Global\"}],\"ServiceName\":\"Azure Service Name\"}]",
+             "impactedServicesTableRows":"<tr>\r\n<td align='center' style='padding: 5px 10px; border-right:1px solid black; border-bottom:1px solid black'>Azure Service Name</td>\r\n<td align='center' style='padding: 5px 10px; border-bottom:1px solid black'>Global<br></td>\r\n</tr>\r\n",
+             "defaultLanguageTitle":"Test Action Group - Test Service Health Alert",
+             "defaultLanguageContent":"<p><strong>Summary of impact</strong>:&nbsp;This is the impact summary.</p>\n<p><br></p>\n<p><strong>Preliminary Root Cause</strong>: This is the preliminary root cause.</p>\n<p><br></p>\n<p><strong>Mitigation</strong>:&nbsp;Mitigation description.</p>\n<p><br></p>\n<p><strong>Next steps</strong>: These are the next steps.&nbsp;</p>\n<p><br></p>\n<p>Stay informed about Azure service issues by creating custom service health alerts: <a href=\"https://aka.ms/ash-videos\" rel=\"noopener noreferrer\" target=\"_blank\">https://aka.ms/ash-videos</a> for video tutorials and <a href=\"https://aka.ms/ash-alerts%20for%20how-to%20documentation\" rel=\"noopener noreferrer\" target=\"_blank\">https://aka.ms/ash-alerts for how-to documentation</a>.</p>\n<p><br></p>",
+             "stage":"Resolved",
+             "communicationId":"11223344556677",
+             "isHIR":"false",
+             "IsSynthetic":"True",
+             "impactType":"SubscriptionList",
+             "version":"0.1.1"
+          },
+          "status":"Resolved",
+          "subStatus":null,
+          "submissionTimestamp":"2021-11-17T01:23:45.0623172+00:00",
+          "ResourceType":null
+       }
+    }
+ }
