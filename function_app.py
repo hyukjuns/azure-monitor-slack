@@ -9,18 +9,18 @@ from slack_sdk.errors import SlackApiError
 client = WebClient(token=os.environ.get("SLACK_BOT_TOKEN"))
 logger = logging.getLogger(__name__)
 
-app = func.FunctionApp(http_auth_level=func.AuthLevel.ANONYMOUS)
+app = func.FunctionApp(http_auth_level=func.AuthLevel.FUNCTION)
 
 @app.route(route="http_trigger")
 def http_trigger(req: func.HttpRequest) -> func.HttpResponse:
-    logging.info('Azure Monitor Alert Triggered')
+    logger.info('Azure Monitor Alert Triggered')
 
     # 1) 수신된 경고 데이터 읽기
     try:
         request_body = req.get_json()
-        logging.info(request_body)
+        logger.info(request_body)
     except Exception as e:
-        logging.info(f'Get Json error occured: {e}')
+        logger.error(f'Get Json error occured: {e}')
         return func.HttpResponse(
              status_code=500
         )
@@ -28,14 +28,19 @@ def http_trigger(req: func.HttpRequest) -> func.HttpResponse:
     # 2) 저장한 데이터 파싱 & 슬랙 전송용도 메시지 만들기
     else:
         payload = request_body['data']
-        slack_message = make_slack_meesage(payload)
-
+        try:
+            slack_message = make_slack_meesage(payload)
+        except Exception as e:
+            logger.error(f'Get Json error occured: {e}')
+            return func.HttpResponse(
+                status_code=500
+            )
         # 4) 슬랙으로 메시지 전송 
 
         # ID of the channel you want to send the message to
         channel_id = "C078LKHB99C"
         try:
-            logging.info(slack_message)
+            logger.info(slack_message)
             # Call the chat.postMessage method using the WebClient
             result = client.chat_postMessage(
                 channel=channel_id, 
@@ -52,26 +57,64 @@ def http_trigger(req: func.HttpRequest) -> func.HttpResponse:
             )
 
 def make_slack_meesage(payload):
+    # Fired/ Resolved 색 구분
+    # Metadata + Alertcontext
     essentals = payload['essentials']
-    alertContext = payload['alertContext']
     # 공통 데이터
-    alertId = essentals['alertId']
     alertRule = essentals['alertRule']
     severity = essentals['severity']
     signalType = essentals['signalType']
     monitorCondition = essentals['monitorCondition']
+    # 경고 발생 / 해결에 맞게 메시지 카드 색상 선택
+    if monitorCondition == "Fired":
+        hex_color_code = "#d9534f" # red
+    elif monitorCondition == "Resolved":
+        hex_color_code = "#85d254" # green
+    else:
+        hex_color_code = "#ffe55d" # yellow
+    monitoringService = essentals['monitoringService']
+    firedDateTime = essentals['firedDateTime']
+    # 경고 별로 경고 컨텍스트 분류
+    alertContext = payload['alertContext']
+    if monitoringService == "Log Alerts V2" and signalType == "Log": # 로그
+        details = {
+            'operator':  alertContext['condition']['allOf'][0]['operator'],
+            'threshold': alertContext['condition']['allOf'][0]['threshold'],
+            'metricValue': alertContext['condition']['allOf'][0]['metricValue'],
+            'dimensions': alertContext['condition']['allOf'][0]['dimensions'],
+        }
+    elif monitoringService == "Platform" and signalType == "Metric": # 메트릭
+        details = {
+            'metricName': alertContext['condition']['allOf'][0]['metricName'],
+            'operator': alertContext['condition']['allOf'][0]['operator'],
+            'threshold': alertContext['condition']['allOf'][0]['threshold'],
+            'metricValue': alertContext['condition']['allOf'][0]['metricValue'],
+            'dimensions': alertContext['condition']['allOf'][0]['dimensions'],
+        }
+    elif monitoringService == "Resource Health" and signalType == "Activity Log": # 리소스 헬스
+        details = {
+            'configurationItems': essentals['configurationItems'],
+            'title': alertContext['properties']['title'],
+            'type': alertContext['properties']['type'],
+            'cause': alertContext['properties']['cause'],
+            'currentHealthStatus': alertContext['properties']['currentHealthStatus']
+        }
+    elif monitoringService == "ServiceHealth" and signalType == "Activity Log": # 서비스 이슈
+        details = {
+            'title': alertContext['properties']['title'],
+            'service': alertContext['properties']['service'],
+            'region': alertContext['properties']['region'],
+            'incidentType': alertContext['properties']['incidentType'],
+            'trackingId': alertContext['properties']['trackingId'],
+            'impactStartTime': alertContext['properties']['impactStartTime'],
+            'stage': alertContext['properties']['stage'],
+            'status': alertContext['status']
+        }
+    
     message = '''
     [{
-    "color": "#E01E5A",
+    "color": "%s",
     "blocks": [
-            {
-                "type": "header",
-                "text": {
-                    "type": "plain_text",
-                    "text": "Azure Monitor Alert %s",
-                    "emoji": true
-                }
-            },
             {
                 "type": "rich_text",
                 "elements": [
@@ -79,8 +122,9 @@ def make_slack_meesage(payload):
                         "type": "rich_text_section",
                         "elements": [
                             {
-                                "type": "text",
-                                "text": "Alert Info\n"
+                                "type": "link",
+                                "url": "https://portal.azure.com/#view/Microsoft_Azure_Monitoring/AzureMonitoringBrowseBlade/~/alertsV2",
+                                "text": "%s: %s",
                             }
                         ]
                     },
@@ -88,23 +132,6 @@ def make_slack_meesage(payload):
                         "type": "rich_text_list",
                         "style": "bullet",
                         "elements": [
-                            {
-                                "type": "rich_text_section",
-                                "elements": [
-                    {
-                                        "type": "text",
-                                        "text": "Alert Id: "
-                                    },
-                                    {
-                                        "type": "link",
-                    "url": "https://slack.com/",
-                                        "text": "%s",
-                    "style": {
-                                            "bold": true
-                                        }
-                                    }
-                                ]
-                            },
                             {
                                 "type": "rich_text_section",
                                 "elements": [
@@ -119,42 +146,48 @@ def make_slack_meesage(payload):
                                 "elements": [
                                     {
                                         "type": "text",
-                                        "text": "Severity: %s"
-                                    }
-                                ]
-                            },
-                            {
-                                "type": "rich_text_section",
-                                "elements": [
-                                    {
-                                        "type": "text",
-                                        "text": "SignalType: %s"
-                                    }
-                                ]
-                            },
-                            {
-                                "type": "rich_text_section",
-                                "elements": [
-                                    {
-                                        "type": "text",
                                         "text": "MonitorCondition: %s"
                                     }
                                 ]
+                            },
+                            {
+                                "type": "rich_text_section",
+                                "elements": [
+                                    {
+                                        "type": "text",
+                                        "text": "Triggerd Time: %s"
+                                    }
+                                ]
+                            },
+                            {
+                                "type": "rich_text_section",
+                                "elements": [
+                                    {
+                                        "type": "text",
+                                        "text": "Severity: %s"
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "Details: \n"
+                            },
+                            {
+                                "type": "text",
+                                "text": "%s",
+                                "style": {
+                                    "code": true
+                                }
                             }
                         ]
                     }
                 ]
             }
         ]
-    }]''' % (alertRule, alertId, alertRule, severity, signalType, monitorCondition)
-
-    # 경고 별로 경고 컨텍스트 분류
-    # if essentals['monitoringService'] == "Log Alerts V2" and essentals['signalType'] == "Log": # 로그
-       
-    # elif essentals['monitoringService'] == "Platform" and essentals['signalType'] == "Metric": # 메트릭
-        
-    # elif essentals['monitoringService'] == "Resource Health" and essentals['signalType'] == "Activity Log": # 리소스 헬스
-        
-    # elif essentals['monitoringService'] == "ServiceHealth" and essentals['signalType'] == "Activity Log": # 서비스 이슈
-        
+    }]''' % (hex_color_code, monitorCondition, alertRule, alertRule, monitorCondition, firedDateTime, severity, details)
     return message

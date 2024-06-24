@@ -72,7 +72,11 @@ alertRule = essentals['alertRule']
 severity = essentals['severity']
 signalType = essentals['signalType']
 monitorCondition = essentals['monitorCondition']
-
+test_list = {
+    'a': 1,
+    'b': "test"
+}
+test_list_jp = json.dumps(test_list)
 print(json_data['data']['essentials']) 
 
 payload = '''
@@ -155,13 +159,37 @@ payload = '''
 									"text": "MonitorCondition: %s"
 								}
 							]
+						},
+                        {
+							"type": "rich_text_section",
+							"elements": [
+								{
+									"type": "text",
+									"text": "Dimension: \n %s",
+									"style": {
+										"code": true
+									}
+                                }
+							]
 						}
 					]
 				}
 			]
+		},
+		{
+			"type": "divider"
+		},
+		{
+			"type": "context",
+			"elements": [
+				{
+					"type": "mrkdwn",
+					"text": "%s"
+				}
+			]
 		}
 	]
-}]''' % (alertRule, alertId, alertRule, severity, signalType, monitorCondition)
+}]''' % (alertRule, alertId, alertRule, severity, signalType, monitorCondition, test_list,test_list)
 
 # ID of the channel you want to send the message to
 channel_id = "C078LKHB99C"
