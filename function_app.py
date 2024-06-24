@@ -6,6 +6,7 @@ import json
 from slack_sdk import WebClient
 from slack_sdk.errors import SlackApiError
 
+CHANNEL_ID = os.environ.get("SLACK_CHANNEL_ID")
 client = WebClient(token=os.environ.get("SLACK_BOT_TOKEN"))
 logger = logging.getLogger(__name__)
 
@@ -38,12 +39,11 @@ def http_trigger(req: func.HttpRequest) -> func.HttpResponse:
         # 4) 슬랙으로 메시지 전송 
 
         # ID of the channel you want to send the message to
-        channel_id = "C078LKHB99C"
         try:
             logger.info(slack_message)
             # Call the chat.postMessage method using the WebClient
             result = client.chat_postMessage(
-                channel=channel_id, 
+                channel=CHANNEL_ID, 
                 attachments=slack_message
             )
             logger.info(result)
@@ -155,7 +155,7 @@ def make_slack_meesage(payload):
                                 "elements": [
                                     {
                                         "type": "text",
-                                        "text": "Triggerd Time: %s"
+                                        "text": "Triggered Time: %s"
                                     }
                                 ]
                             },

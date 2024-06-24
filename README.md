@@ -14,6 +14,8 @@
         - SLACK_BOT_TOKEN 
             - 로컬에서 개발할 경우 local.settings.json에 입력
             - Function App에 배포할 경우 Environments에 입력
+        - SLACK_CHANNEL_ID
+            - 알람을 받을 슬랙 채널 아이디
     - Auth Level - Funciton
 2. Slack Bot 구성
     - Slack API: [**chat.postMessage**](https://api.slack.com/methods/chat.postMessage)
