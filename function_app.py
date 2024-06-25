@@ -30,7 +30,7 @@ def http_trigger(req: func.HttpRequest) -> func.HttpResponse:
     else:
         payload = request_body['data']
         try:
-            slack_message = make_slack_meesage(payload)
+            slack_message = make_slack_message(payload)
         except Exception as e:
             logger.error(f'Get Json error occured: {e}')
             return func.HttpResponse(
@@ -56,7 +56,7 @@ def http_trigger(req: func.HttpRequest) -> func.HttpResponse:
                 status_code=500
             )
 
-def make_slack_meesage(payload):
+def make_slack_message(payload):
     # Fired/ Resolved 색 구분
     # Metadata + Alertcontext
     essentals = payload['essentials']

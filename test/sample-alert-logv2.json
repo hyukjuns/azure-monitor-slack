@@ -6,7 +6,7 @@
           "alertRule":"test-logAlertRule-v2",
           "severity":"Sev3",
           "signalType":"Log",
-          "monitorCondition":"No Data",
+          "monitorCondition":"Resolved",
           "monitoringService":"Log Alerts V2",
           "alertTargetIDs":[
              "/subscriptions/11111111-1111-1111-1111-111111111111/resourcegroups/test-RG/providers/microsoft.operationalinsights/workspaces/test-logAnalyticsWorkspace"
