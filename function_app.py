@@ -1,8 +1,6 @@
 import azure.functions as func
 import logging
 import os
-import json
-# Import WebClient from Python SDK (github.com/slackapi/python-slack-sdk)
 from slack_sdk import WebClient
 from slack_sdk.errors import SlackApiError
 
@@ -36,19 +34,16 @@ def http_trigger(req: func.HttpRequest) -> func.HttpResponse:
             return func.HttpResponse(
                 status_code=500
             )
-        # 4) 슬랙으로 메시지 전송 
-
-        # ID of the channel you want to send the message to
+        # 3) 슬랙으로 메시지 전송 
         try:
             logger.info(slack_message)
-            # Call the chat.postMessage method using the WebClient
             result = client.chat_postMessage(
                 channel=CHANNEL_ID, 
                 attachments=slack_message
             )
             logger.info(result)
             return func.HttpResponse(
-             status_code=200
+                status_code=200
             )
         except SlackApiError as e:
             logger.error(f"Error posting slack message: {e}")
@@ -57,10 +52,8 @@ def http_trigger(req: func.HttpRequest) -> func.HttpResponse:
             )
 
 def make_slack_message(payload):
-    # Fired/ Resolved 색 구분
-    # Metadata + Alertcontext
-    essentals = payload['essentials']
     # 공통 데이터
+    essentals = payload['essentials']
     alertRule = essentals['alertRule']
     severity = essentals['severity']
     signalType = essentals['signalType']
@@ -74,42 +67,42 @@ def make_slack_message(payload):
         hex_color_code = "#ffe55d" # yellow
     monitoringService = essentals['monitoringService']
     firedDateTime = essentals['firedDateTime']
+
     # 경고 별로 경고 컨텍스트 분류
     alertContext = payload['alertContext']
     if monitoringService == "Log Alerts V2" and signalType == "Log": # 로그
-        details = {
-            'operator':  alertContext['condition']['allOf'][0]['operator'],
-            'threshold': alertContext['condition']['allOf'][0]['threshold'],
-            'metricValue': alertContext['condition']['allOf'][0]['metricValue'],
-            'dimensions': alertContext['condition']['allOf'][0]['dimensions'],
-        }
+        operator =  alertContext['condition']['allOf'][0]['operator']
+        threshold = alertContext['condition']['allOf'][0]['threshold']
+        metricValue = alertContext['condition']['allOf'][0]['metricValue']
+        dimensions = alertContext['condition']['allOf'][0]['dimensions']
+        details = f"- Operator: {operator} \n- Threshold: {threshold} \n- MetricValue: {metricValue} \n- Dimensions: {dimensions}"
     elif monitoringService == "Platform" and signalType == "Metric": # 메트릭
-        details = {
-            'metricName': alertContext['condition']['allOf'][0]['metricName'],
-            'operator': alertContext['condition']['allOf'][0]['operator'],
-            'threshold': alertContext['condition']['allOf'][0]['threshold'],
-            'metricValue': alertContext['condition']['allOf'][0]['metricValue'],
-            'dimensions': alertContext['condition']['allOf'][0]['dimensions'],
-        }
+        metricName = alertContext['condition']['allOf'][0]['metricName']
+        operator = alertContext['condition']['allOf'][0]['operator']
+        threshold = alertContext['condition']['allOf'][0]['threshold']
+        metricValue = alertContext['condition']['allOf'][0]['metricValue']
+        dimensions = alertContext['condition']['allOf'][0]['dimensions']
+        details = f"- MetricName: {metricName} \n-Operator: {operator} \n-Threshold: {threshold} \n-MetricValue: {metricValue} \n-Dimensions: {dimensions}"
     elif monitoringService == "Resource Health" and signalType == "Activity Log": # 리소스 헬스
-        details = {
-            'configurationItems': essentals['configurationItems'],
-            'title': alertContext['properties']['title'],
-            'type': alertContext['properties']['type'],
-            'cause': alertContext['properties']['cause'],
-            'currentHealthStatus': alertContext['properties']['currentHealthStatus']
-        }
+        configurationItems = essentals['configurationItems']
+        title = alertContext['properties']['title']
+        type = alertContext['properties']['type']
+        cause = alertContext['properties']['cause']
+        currentHealthStatus = alertContext['properties']['currentHealthStatus']
+        details = f"- configurationItems: {configurationItems} \n- Title: {title} \n- Type: {type} \n- Cause: {cause} \n- CurrentHealthStatus: {currentHealthStatus}"
     elif monitoringService == "ServiceHealth" and signalType == "Activity Log": # 서비스 이슈
-        details = {
-            'title': alertContext['properties']['title'],
-            'service': alertContext['properties']['service'],
-            'region': alertContext['properties']['region'],
-            'incidentType': alertContext['properties']['incidentType'],
-            'trackingId': alertContext['properties']['trackingId'],
-            'impactStartTime': alertContext['properties']['impactStartTime'],
-            'stage': alertContext['properties']['stage'],
-            'status': alertContext['status']
-        }
+        title = alertContext['properties']['title']
+        service = alertContext['properties']['service']
+        region = alertContext['properties']['region']
+        incidentType = alertContext['properties']['incidentType']
+        trackingId = alertContext['properties']['trackingId']
+        impactStartTime = alertContext['properties']['impactStartTime']
+        stage = alertContext['properties']['stage']
+        status = alertContext['status']
+        if stage == "Complete" or stage == "Resolved":
+            hex_color_code = "#85d254"
+            monitorCondition = stage
+        details = f"- Title: {title} \n- Service: {service} \n- Region: {region} \n- IncidentType: {incidentType} \n- TrackingId: {trackingId}- ImpactStartTime: {impactStartTime} \n- Stage: {stage} \n- Status: {status}"
     
     message = '''
     [{
@@ -137,7 +130,14 @@ def make_slack_message(payload):
                                 "elements": [
                                     {
                                         "type": "text",
-                                        "text": "Alert Rule: %s"
+                                        "text": "Alert Rule: ",
+                                        "style": {
+                                            "bold": true
+                                        }
+                                    },
+                                    {
+                                        "type": "text",
+                                        "text": "%s"
                                     }
                                 ]
                             },
@@ -146,7 +146,14 @@ def make_slack_message(payload):
                                 "elements": [
                                     {
                                         "type": "text",
-                                        "text": "MonitorCondition: %s"
+                                        "text": "MonitorCondition: ",
+                                        "style": {
+                                            "bold": true
+                                        }
+                                    },
+                                    {
+                                        "type": "text",
+                                        "text": "%s"
                                     }
                                 ]
                             },
@@ -155,7 +162,14 @@ def make_slack_message(payload):
                                 "elements": [
                                     {
                                         "type": "text",
-                                        "text": "Triggered Time: %s"
+                                        "text": "Triggered Time: ",
+                                        "style": {
+                                            "bold": true
+                                        }
+                                    },
+                                    {
+                                        "type": "text",
+                                        "text": "%s"
                                     }
                                 ]
                             },
@@ -164,25 +178,32 @@ def make_slack_message(payload):
                                 "elements": [
                                     {
                                         "type": "text",
-                                        "text": "Severity: %s"
+                                        "text": "Severity: ",
+                                        "style": {
+                                            "bold": true
+                                        }
+                                    },
+                                    {
+                                        "type": "text",
+                                        "text": "%s"
                                     }
                                 ]
-                            }
-                        ]
-                    },
-                    {
-                        "type": "rich_text_section",
-                        "elements": [
-                            {
-                                "type": "text",
-                                "text": "Details: \n"
                             },
                             {
-                                "type": "text",
-                                "text": "%s",
-                                "style": {
-                                    "code": true
-                                }
+                                "type": "rich_text_section",
+                                "elements": [
+                                    {
+                                        "type": "text",
+                                        "text": "Details: \n",
+                                        "style": {
+                                            "bold": true
+                                        }
+                                    },
+                                    {
+                                        "type": "text",
+                                        "text": "%s"
+                                    }
+                                ]
                             }
                         ]
                     }
