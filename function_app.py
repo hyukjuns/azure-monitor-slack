@@ -30,7 +30,7 @@ def http_trigger(req: func.HttpRequest) -> func.HttpResponse:
         try:
             slack_message = make_slack_message(payload)
         except Exception as e:
-            logger.error(f'Get Json error occured: {e}')
+            logger.error(f'make_slack_message def error occured: {e}')
             return func.HttpResponse(
                 status_code=500
             )
@@ -82,14 +82,14 @@ def make_slack_message(payload):
         threshold = alertContext['condition']['allOf'][0]['threshold']
         metricValue = alertContext['condition']['allOf'][0]['metricValue']
         dimensions = alertContext['condition']['allOf'][0]['dimensions']
-        details = f"- MetricName: {metricName} \n-Operator: {operator} \n-Threshold: {threshold} \n-MetricValue: {metricValue} \n-Dimensions: {dimensions}"
+        details = f"- MetricName: {metricName} \n- Operator: {operator} \n- Threshold: {threshold} \n- MetricValue: {metricValue} \n- Dimensions: {dimensions}"
     elif monitoringService == "Resource Health" and signalType == "Activity Log": # 리소스 헬스
         configurationItems = essentals['configurationItems']
         title = alertContext['properties']['title']
         type = alertContext['properties']['type']
         cause = alertContext['properties']['cause']
         currentHealthStatus = alertContext['properties']['currentHealthStatus']
-        details = f"- configurationItems: {configurationItems} \n- Title: {title} \n- Type: {type} \n- Cause: {cause} \n- CurrentHealthStatus: {currentHealthStatus}"
+        details = f"- ConfigurationItems: {configurationItems} \n- Title: {title} \n- Type: {type} \n- Cause: {cause} \n- CurrentHealthStatus: {currentHealthStatus}"
     elif monitoringService == "ServiceHealth" and signalType == "Activity Log": # 서비스 이슈
         title = alertContext['properties']['title']
         service = alertContext['properties']['service']
@@ -102,7 +102,7 @@ def make_slack_message(payload):
         if stage == "Complete" or stage == "Resolved":
             hex_color_code = "#85d254"
             monitorCondition = stage
-        details = f"- Title: {title} \n- Service: {service} \n- Region: {region} \n- IncidentType: {incidentType} \n- TrackingId: {trackingId}- ImpactStartTime: {impactStartTime} \n- Stage: {stage} \n- Status: {status}"
+        details = f"- Title: {title} \n- Service: {service} \n- Region: {region} \n- IncidentType: {incidentType} \n- TrackingId: {trackingId} \n- ImpactStartTime: {impactStartTime} \n- Stage: {stage} \n- Status: {status}"
     
     message = '''
     [{
