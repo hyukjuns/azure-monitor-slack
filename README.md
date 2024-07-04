@@ -5,6 +5,13 @@
 2. [VSCode Python Extension](https://marketplace.visualstudio.com/items?itemName=ms-python.python)
 3. [VSCode Azure Functions Extenstion](https://marketplace.visualstudio.com/items?itemName=ms-azuretools.vscode-azurefunctions)
 4. [VSCode Azurite Extension](https://marketplace.visualstudio.com/items?itemName=ms-azuretools.vscode-azurefunctions)
+5. FUNCTION CORE TOOL
+```
+brew tap azure/functions
+brew install azure-functions-core-tools@4
+# if upgrading on a machine that has 2.x or 3.x installed:
+brew link --overwrite azure-functions-core-tools@4
+```
 ## Configuration Step
 1. Function 생성 (In VSCode)
     - Consumption Plan
@@ -24,3 +31,20 @@
     - 알림 받고자 하는 채널에 Bot 추가
 3. Azure Monitor - Action Group 구성
     - Action -> Webhook -> Function Trigger URL
+
+
+---
+# USAGE
+1. git clone
+2. azurite, core tool 설치
+```
+brew tap azure/functions
+brew install azure-functions-core-tools@4
+# if upgrading on a machine that has 2.x or 3.x installed:
+brew link --overwrite azure-functions-core-tools@4
+```
+2. venv 세팅
+```
+python -m venv .venv
+source .venv/bin/activate
+```

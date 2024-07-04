@@ -20,7 +20,7 @@ def http_trigger(req: func.HttpRequest) -> func.HttpResponse:
         logger.info(request_body)
     except Exception as e:
         logger.error(f'Get Json error occured: {e}')
-        return func.HttpResponse(
+        return func.HttpRecsponse(
              status_code=500
         )
 
