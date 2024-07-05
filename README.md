@@ -35,7 +35,27 @@ brew link --overwrite azure-functions-core-tools@4
 
 ---
 # USAGE
-1. git clone
-2. azurite, azure function core tool 설치
-3. func start by vscode
-    f1 > excute function now
+1. git repo clone
+2. local.settings.json 파일 생성
+```
+{
+  "IsEncrypted": false,
+  "Values": {
+    "FUNCTIONS_WORKER_RUNTIME": "python",
+    "AzureWebJobsFeatureFlags": "EnableWorkerIndexing",
+    "AzureWebJobsStorage": "UseDevelopmentStorage=true",
+    "SLACK_BOT_TOKEN": "",
+    "SLACK_CHANNEL_ID": ""
+  }
+}
+```
+3. azurite, azure function core tool 설치
+4. python venv 세팅
+```
+python -m venv .venv
+source .venv/bin/activate
+```
+5. func start by vscode
+ ```
+F5 or F1 > Excute Function Now
+```
