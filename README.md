@@ -1,61 +1,66 @@
 # Azure Monitor Alert to Slack
 
-## Pre Requisite
+## 사전 준비
 1. VSCode
-2. [VSCode Python Extension](https://marketplace.visualstudio.com/items?itemName=ms-python.python)
-3. [VSCode Azure Functions Extenstion](https://marketplace.visualstudio.com/items?itemName=ms-azuretools.vscode-azurefunctions)
-4. [VSCode Azurite Extension](https://marketplace.visualstudio.com/items?itemName=ms-azuretools.vscode-azurefunctions)
-5. FUNCTION CORE TOOL
-```
-brew tap azure/functions
-brew install azure-functions-core-tools@4
-# if upgrading on a machine that has 2.x or 3.x installed:
-brew link --overwrite azure-functions-core-tools@4
-```
-## Configuration Step
-1. Function 생성 (In VSCode)
-    - Consumption Plan
+2. [Python Extension](https://marketplace.visualstudio.com/items?itemName=ms-python.python)
+3. [Azure Functions Extenstion](https://marketplace.visualstudio.com/items?itemName=ms-azuretools.vscode-azurefunctions)
+4. [Azurite Extension](https://marketplace.visualstudio.com/items?itemName=ms-azuretools.vscode-azurefunctions)
+5. [Azure Function Core Tools](https://learn.microsoft.com/en-us/azure/azure-functions/create-first-function-cli-python?tabs=linux%2Cbash%2Cazure-cli%2Cbrowser#install-the-azure-functions-core-tools)
+
+## 저장소 사용 순서
+1. Clone this repo
+
+2. local.settings.json 파일 생성
+
+    ```
+    {
+        "IsEncrypted": false,
+        "Values": {
+            "FUNCTIONS_WORKER_RUNTIME": "python",
+            "AzureWebJobsFeatureFlags": "EnableWorkerIndexing",
+            "AzureWebJobsStorage": "UseDevelopmentStorage=true",
+            "SLACK_BOT_TOKEN": "",
+            "SLACK_CHANNEL_ID": ""
+        }
+    }
+    ```
+
+3. Python 가상환경 세팅
+
+    ```
+    python -m venv .venv
+    source .venv/bin/activate
+    ```
+
+4. Function 로컬 실행 or Azure 배포
+    - 로컬 실행
+        - ```F5```: 실행 단축키
+        - ```F1```: Azure Function: Excute Function Now
+    - Function App 생성
+        - ```F1```: Azure Function: Create Function App in Azure (Advanced)
+    - 배포
+        - ```F1```: Azure Function: Deploy to Function App
+    
+
+## 초기 구성 절차
+1. Function App 구성
+    - Tier: Consumption Plan
     - LANG: Python 3.11.2
     - Trigger Type: HTTP Trigger
-    - ENV
-        - SLACK_BOT_TOKEN 
-            - 로컬에서 개발할 경우 local.settings.json에 입력
-            - Function App에 배포할 경우 Environments에 입력
-        - SLACK_CHANNEL_ID
+    - Environments Variables:
+        - 로컬에서 개발할 경우 local.settings.json에 입력, Function App에 배포할 경우 Environments에 입력
+        - ```SLACK_BOT_TOKEN```
+            - Slack bot의 Auth Token
+        - ```SLACK_CHANNEL_ID```
             - 알람을 받을 슬랙 채널 아이디
-    - Auth Level - Funciton
+    - Function Auth Level: Funciton
+
 2. Slack Bot 구성
-    - Slack API: [**chat.postMessage**](https://api.slack.com/methods/chat.postMessage)
-    - Permission
-        - Bot Token Scope: [**chat:write**](https://api.slack.com/scopes/chat:write)
+    - Slack bot 생성
+    - Slack API: [chat.postMessage](https://api.slack.com/methods/chat.postMessage)
+    - Slack API Permission
+        - Bot Token Scope: [chat:write](https://api.slack.com/scopes/chat:write)
     - 알림 받고자 하는 채널에 Bot 추가
-3. Azure Monitor - Action Group 구성
-    - Action -> Webhook -> Function Trigger URL
 
-
----
-# USAGE
-1. git repo clone
-2. local.settings.json 파일 생성
-```
-{
-  "IsEncrypted": false,
-  "Values": {
-    "FUNCTIONS_WORKER_RUNTIME": "python",
-    "AzureWebJobsFeatureFlags": "EnableWorkerIndexing",
-    "AzureWebJobsStorage": "UseDevelopmentStorage=true",
-    "SLACK_BOT_TOKEN": "",
-    "SLACK_CHANNEL_ID": ""
-  }
-}
-```
-3. azurite, azure function core tool 설치
-4. python venv 세팅
-```
-python -m venv .venv
-source .venv/bin/activate
-```
-5. func start by vscode
- ```
-F5 or F1 > Excute Function Now
-```
+3. Azure Monitor에서 Action Group 구성
+    - Action -> Webhook -> Function Trigger URL 입력
