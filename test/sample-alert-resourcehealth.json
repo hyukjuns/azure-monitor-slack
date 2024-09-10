@@ -32,7 +32,7 @@
           "properties":{
              "title":"Rebooted by user",
              "details":null,
-             "currentHealthStatus":"Unavailable",
+             "currentHealthStatus":"Available",
              "previousHealthStatus":"Available",
              "type":"Downtime",
              "cause":"UserInitiated"

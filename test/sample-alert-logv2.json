@@ -40,6 +40,14 @@
                       {
                          "name":"Computer",
                          "value":"test-computer"
+                      },
+                      {
+                        "name":"InstanceName",
+                        "value":"cpu0"
+                      },
+                      {
+                        "name":"_ResourceId",
+                        "value":"/test/test/test/test/se/tset/set/s/et/test/test/test"
                       }
                    ],
                    "metricValue":3.0,

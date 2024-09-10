@@ -1,6 +1,7 @@
-import azure.functions as func
 import logging
 import os
+from datetime import datetime
+import azure.functions as func
 from slack_sdk import WebClient
 from slack_sdk.errors import SlackApiError
 
@@ -66,30 +67,52 @@ def make_slack_message(payload):
     else:
         hex_color_code = "#ffe55d" # yellow
     monitoringService = essentals['monitoringService']
-    firedDateTime = essentals['firedDateTime']
+    
+    # ISO Time 포맷 변경
+    firedDateTime = essentals['firedDateTime'] # ISO Time
+    dt = datetime.fromisoformat(firedDateTime)
+    formatted_time = dt.strftime("%Y:%m:%d %H:%M:%S %Z")
+
+    # 미리보기 메시지 작성
+    preview_message = f"{monitorCondition}: {alertRule}"
 
     # 경고 별로 경고 컨텍스트 분류
     alertContext = payload['alertContext']
     if monitoringService == "Log Alerts V2" and signalType == "Log": # 로그
+        configurationItems = essentals['configurationItems']
+        metricMeasureColumn = alertContext['condition']['allOf'][0]['metricMeasureColumn']
         operator =  alertContext['condition']['allOf'][0]['operator']
         threshold = alertContext['condition']['allOf'][0]['threshold']
         metricValue = alertContext['condition']['allOf'][0]['metricValue']
         dimensions = alertContext['condition']['allOf'][0]['dimensions']
-        details = f"- Operator: {operator} \n- Threshold: {threshold} \n- MetricValue: {metricValue} \n- Dimensions: {dimensions}"
+        formatted_dimensions=""
+        for index, item in enumerate(dimensions):
+            formatted_dimensions += f"\t{index}) {item['name']}: {item['value']}\n"
+        details = f"- Affected Resources: {configurationItems} \n- MetricMeasureColumn: {metricMeasureColumn} \n- Operator: {operator} \n- Threshold: {threshold} \n- MetricValue: {metricValue} \n- Dimensions: \n{formatted_dimensions}"
     elif monitoringService == "Platform" and signalType == "Metric": # 메트릭
+        configurationItems = essentals['configurationItems']
         metricName = alertContext['condition']['allOf'][0]['metricName']
         operator = alertContext['condition']['allOf'][0]['operator']
         threshold = alertContext['condition']['allOf'][0]['threshold']
         metricValue = alertContext['condition']['allOf'][0]['metricValue']
         dimensions = alertContext['condition']['allOf'][0]['dimensions']
-        details = f"- MetricName: {metricName} \n- Operator: {operator} \n- Threshold: {threshold} \n- MetricValue: {metricValue} \n- Dimensions: {dimensions}"
+        formatted_dimensions=""
+        for index, item in enumerate(dimensions):
+            formatted_dimensions += f"\t{index}) {item['name']}: {item['value']}\n"
+        details = f"- Affected Resources: {configurationItems} \n- MetricName: {metricName} \n- Operator: {operator} \n- Threshold: {threshold} \n- MetricValue: {metricValue} \n- Dimensions: \n{formatted_dimensions}"
     elif monitoringService == "Resource Health" and signalType == "Activity Log": # 리소스 헬스
         configurationItems = essentals['configurationItems']
         title = alertContext['properties']['title']
         type = alertContext['properties']['type']
         cause = alertContext['properties']['cause']
         currentHealthStatus = alertContext['properties']['currentHealthStatus']
-        details = f"- ConfigurationItems: {configurationItems} \n- Title: {title} \n- Type: {type} \n- Cause: {cause} \n- CurrentHealthStatus: {currentHealthStatus}"
+        previousHealthStatus = alertContext['properties']['previousHealthStatus']
+        status = alertContext['status']
+        # 이슈 완화 되었을 경우 메시지 카드 색상 및 문구 변경
+        if currentHealthStatus == "Available":
+            hex_color_code = "#85d254" # green
+            monitorCondition = status
+        details = f"- Affected Resources: {configurationItems} \n- Title: {title} \n- Type: {type} \n- Cause: {cause} \n- CurrentHealthStatus: {currentHealthStatus} \n- PreviousHealthStatus: {previousHealthStatus}"
     elif monitoringService == "ServiceHealth" and signalType == "Activity Log": # 서비스 이슈
         title = alertContext['properties']['title']
         service = alertContext['properties']['service']
@@ -99,13 +122,15 @@ def make_slack_message(payload):
         impactStartTime = alertContext['properties']['impactStartTime']
         stage = alertContext['properties']['stage']
         status = alertContext['status']
+        # 이슈 완화 되었을 경우 메시지 카드 색상 및 문구 변경
         if stage == "Complete" or stage == "Resolved":
-            hex_color_code = "#85d254"
+            hex_color_code = "#85d254" # green
             monitorCondition = stage
         details = f"- Title: {title} \n- Service: {service} \n- Region: {region} \n- IncidentType: {incidentType} \n- TrackingId: {trackingId} \n- ImpactStartTime: {impactStartTime} \n- Stage: {stage} \n- Status: {status}"
     
     message = '''
     [{
+    "fallback": "%s",
     "color": "%s",
     "blocks": [
             {
@@ -117,7 +142,7 @@ def make_slack_message(payload):
                             {
                                 "type": "link",
                                 "url": "https://portal.azure.com/#view/Microsoft_Azure_Monitoring/AzureMonitoringBrowseBlade/~/alertsV2",
-                                "text": "%s: %s",
+                                "text": "%s",
                             }
                         ]
                     },
@@ -210,5 +235,5 @@ def make_slack_message(payload):
                 ]
             }
         ]
-    }]''' % (hex_color_code, monitorCondition, alertRule, alertRule, monitorCondition, firedDateTime, severity, details)
+    }]''' % (preview_message, hex_color_code, preview_message, alertRule, monitorCondition, formatted_time, severity, details)
     return message
