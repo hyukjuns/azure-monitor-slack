@@ -20,7 +20,7 @@
 ### 주의사항
 - Azure Monitor Alert 설정 시 Common Alert Schema 사용 필수 [공식문서](https://learn.microsoft.com/ko-kr/azure/azure-monitor/alerts/alerts-common-schema)
 
-### 저장소 사용 순서
+### 저장소 사용 방법
 1. 저장소 다운로드
 
     ```
@@ -73,8 +73,29 @@
 2. Azure Monitor에서 Action Group 구성 시
     - Action -> Webhook -> Function Trigger URL 입력
     - Azure Monitor Alert 설정 시 Common Alert Schema 사용 필수 [공식문서](https://learn.microsoft.com/ko-kr/azure/azure-monitor/alerts/alerts-common-schema)
-### Release Note
-> 2024.09 개선 내역
+
+### 참고내용
+
+> Service Issue 진행 상태
+
+- Monitoring Condition은 항상 Fired
+- 진행상태 확인 항목
+
+    |항목|계획 발생|진행중|완료|
+    |:---:|:---:|:---:|:---:|
+    |Stage|Planned|In progress|Complete|
+    |Status|Active|Active|Resolved|
+
+> ResourceHealth
+- Monitoring Condition은 항상 Fired    
+
+### 개선 기록
+> 2024.09.23
+```
+1. Resource Health, Service Issue 진행 상태에 따라 메시지 카드 색상, 제목 변경 처리
+2. 메시지 카드 항목 중 Details -> Alert Context로 변경
+```
+> 2024.09.10
 ```
 1. 디멘션 개행 출력 및 Key Value 파싱
 2. 타임 포맷 변경
