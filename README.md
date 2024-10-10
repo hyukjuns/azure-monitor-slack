@@ -1,4 +1,8 @@
-# Azure Monitor Alert to Slack
+# Azure Monitor Alert & Grafana Alert processing and send to Slack
+
+### Functions
+1. Azure Monitor Alert Processing Function
+2. Grafana Alert Processing Function
 
 ### 사전 준비
 #### 1.  Azure 개발 환경 셋업
@@ -90,6 +94,12 @@
 - Monitoring Condition은 항상 Fired    
 
 ### 개선 기록
+> 2024.10.10
+```
+1. Grafana > Function > Slack 으로 알람 메시지 처리하는 Function 구현
+2. Azure Monitor Alert 및 Grafana Alert을 처리하는 Function 이름 및 Routing Endpoint 수정
+3. make_slack_message 모듈 분리
+```
 > 2024.09.23
 ```
 1. Resource Health, Service Issue 진행 상태에 따라 메시지 카드 색상, 제목 변경 처리

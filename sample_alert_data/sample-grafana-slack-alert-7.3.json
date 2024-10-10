@@ -1,0 +1,33 @@
+{
+  "attachments": [
+    {
+      "color": "#D63232",
+      "fallback": "[Alerting] Test notification",
+      "fields": [
+        {
+          "short": true,
+          "title": "High value",
+          "value": 100
+        },
+        {
+          "short": true,
+          "title": "Higher Value",
+          "value": 200
+        },
+        {
+          "short": false,
+          "title": "Error message",
+          "value": "This is only a test"
+        }
+      ],
+      "footer": "Grafana v7.3.7",
+      "footer_icon": "https://grafana.com/assets/img/fav32.png",
+      "text": "Someone is testing the alert notification within Grafana.",
+      "title": "[Alerting] Test notification",
+      "title_link": "http://localhost:3000/",
+      "ts": 1728531934
+    }
+  ],
+  "parse": "full",
+  "text": "[Alerting] Test notification"
+}
