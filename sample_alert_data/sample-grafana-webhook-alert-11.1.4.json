@@ -38,7 +38,7 @@
   "groupKey": "test-57c6d9296de2ad39-1728533577",
   "truncatedAlerts": 0,
   "orgId": 1,
-  "title": "[FIRING:1] TestAlert Grafana ",
+  "title": "[RESOLVED] TestAlert Grafana ",
   "state": "alerting",
   "message": "**Firing**\n\nValue: [no value]\nLabels:\n - alertname = TestAlert\n - instance = Grafana\nAnnotations:\n - summary = Notification test\nSilence: http://localhost:3000/alerting/silence/new?alertmanager=grafana&matcher=alertname%3DTestAlert&matcher=instance%3DGrafana\n"
 }

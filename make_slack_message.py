@@ -9,7 +9,7 @@ def grafana(payload) -> str:
         title = payload["title"]
         message = payload["message"]
         title_link = payload["externalURL"]
-    if "OK" in title:
+    if "OK" in title or "RESOLVED" in title:
         color = "#85d254" # green
     else:
         color = "#d9534f" # red
