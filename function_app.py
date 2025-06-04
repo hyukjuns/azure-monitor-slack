@@ -23,7 +23,7 @@ def azure_monitor_http_trigger(req: func.HttpRequest) -> func.HttpResponse:
         logging.info(request_body)
     except Exception as e:
         logging.error(f'Error at Get Json: {e}')
-        return func.HttpRecsponse(status_code=500)
+        return func.HttpResponse(status_code=500)
     # 2) 저장한 데이터 파싱 & 슬랙 전송용도 메시지 만들기
     else:
         payload = request_body['data']
@@ -54,7 +54,7 @@ def grafana_http_trigger(req: func.HttpRequest) -> func.HttpResponse:
     try:
         request_body = req.get_json()
         logging.info(request_body)
-    except TypeError as e:
+    except Exception as e:
         logging.error(f'Get Json error occured: {e}')
         return func.HttpResponse(status_code=500)
     else:
